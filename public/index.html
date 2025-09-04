@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BDG88ZF Live Results</title>
+<style>
+body{font-family:system-ui,Arial;margin:16px;background:#0f172a;color:#e6eef8}
+.card{background:#0b1220;padding:14px;border-radius:10px;max-width:900px;margin:0 auto;box-shadow:0 6px 18px rgba(2,6,23,.6);}
+h1{font-size:20px;margin-bottom:12px;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.04);}
+th{font-size:13px;color:#9fb0d6;}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#13263f;color:#cfe7ff;font-weight:600;font-size:12px;}
+.number{font-weight:700;font-size:16px;}
+.green{color:#58d68d;} .red{color:#ff7a7a;} .violet{color:#c9a3ff;}
+.center{text-align:center;}
+.muted{color:#8ea6ce;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>লাইভ রেজাল্ট</h1>
+  <div class="center muted">আপডেট প্রতি 5 সেকেন্ডে</div>
+  <table id="results">
+    <thead>
+      <tr>
+        <th>Issue</th>
+        <th>Number</th>
+        <th>Colour</th>
+        <th>Premium</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p class="center muted" id="status">লোড হচ্ছে…</p>
+</div>
+
+<script>
+const API = "/api/results";
+const POLL_MS = 5000;
+
+async function fetchData() {
+  try {
+    const res = await fetch(API);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    render(data);
+    document.getElementById("status").textContent = "আপডেট ঠিকঠাক আছে";
+  } catch(e) {
+    console.error(e);
+    document.getElementById("status").textContent = "ফetch error: " + e.message;
+  }
+}
+
+function render(json) {
+  if (!json?.data?.list) return;
+  const tbody = document.querySelector("#results tbody");
+  tbody.innerHTML = "";
+
+  for (let item of json.data.list) {
+    const tr = document.createElement("tr");
+
+    const tdIssue = document.createElement("td");
+    tdIssue.textContent = item.issueNumber;
+    tr.appendChild(tdIssue);
+
+    const tdNum = document.createElement("td");
+    tdNum.innerHTML = `<span class="number">${item.number}</span>`;
+    tr.appendChild(tdNum);
+
+    const tdCol = document.createElement("td");
+    const cols = item.colour.split(",").map(c=>c.trim());
+    tdCol.innerHTML = cols.map(c => `<span class="${c==='red'?'red':c==='violet'?'violet':'green'}">${c}</span>`).join(", ");
+    tr.appendChild(tdCol);
+
+    const tdPrem = document.createElement("td");
+    tdPrem.textContent = item.premium;
+    tr.appendChild(tdPrem);
+
+    tbody.appendChild(tr);
+  }
+}
+
+fetchData();
+setInterval(fetchData, POLL_MS);
+</script>
+</body>
+</html>
